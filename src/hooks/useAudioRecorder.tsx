@@ -9,6 +9,7 @@ interface UseAudioRecorderReturn {
   stopRecording: () => void;
   togglePauseResume: () => void;
   isRecording: boolean;
+  isPaused: boolean;
 }
 
 const useAudioRecorder = ({
@@ -117,6 +118,7 @@ const useAudioRecorder = ({
     stopRecording,
     togglePauseResume,
     isRecording,
+    isPaused,
   };
 };
 
