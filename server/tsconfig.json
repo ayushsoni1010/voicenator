@@ -22,6 +22,6 @@
       "@/utils*": ["./src/utils*"]
     }
   },
-  "include": ["src/**/*.ts", "src/server.js"],
+  "include": ["src/**/*.ts", "src/server.ts"],
   "exclude": ["node_modules"]
 }
