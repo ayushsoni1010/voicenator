@@ -17,7 +17,7 @@ const useAudioRecorder = ({
 }: UseAudioRecorderProps): UseAudioRecorderReturn => {
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [recordingTime, setRecordingTime] = useState<number>(0);
+  const [_recordingTime, setRecordingTime] = useState<number>(0);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
     null
   );

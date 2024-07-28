@@ -1,5 +1,5 @@
 // useSocket.tsx
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import io, { Socket } from "socket.io-client";
 
 const serverURL = "http://localhost:8080";

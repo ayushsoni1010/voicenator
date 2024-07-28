@@ -1,77 +1,77 @@
-import { useEffect, useState } from "react";
-import useAudioRecorder from "./hooks/useAudioRecorder";
-import useSocket from "./hooks/useSocket";
-import Header from "./components/header";
+// import { useEffect, useState } from "react";
+// import useAudioRecorder from "./hooks/useAudioRecorder";
+// import useSocket from "./hooks/useSocket";
+// import Header from "./components/header";
 import { BrowserRouter } from "react-router-dom";
 import Hero from "./components/hero";
 
 function App() {
-  const {
-    socket,
-    initialize,
-    handleStartTranscription,
-    disconnect,
-    initializeStream,
-    sendStreamedAudio,
-    transcription,
-  } = useSocket();
+  // const {
+  //   socket,
+  //   initialize,
+  //   handleStartTranscription,
+  //   disconnect,
+  //   initializeStream,
+  //   sendStreamedAudio,
+  //   transcription,
+  // } = useSocket();
 
-  const [isTranscribing, setIsTranscribing] = useState<boolean>(false);
-  const [data, setData] = useState<Int16Array | null>(null);
+  // const [isTranscribing, setIsTranscribing] = useState<boolean>(false);
+  // const [data, setData] = useState<Int16Array | null>(null);
 
-  useEffect(() => {
-    if (socket === null) {
-      initialize();
-    }
+  // useEffect(() => {
+  //   if (socket === null) {
+  //     initialize();
+  //   }
 
-    return () => {
-      disconnect();
-    };
-  }, [initialize, disconnect, socket]);
+  //   return () => {
+  //     disconnect();
+  //   };
+  // }, [initialize, disconnect, socket]);
 
-  useEffect(() => {
-    if (data) {
-      sendStreamedAudio(data);
-    }
-  }, [data, sendStreamedAudio]);
+  // useEffect(() => {
+  //   if (data) {
+  //     sendStreamedAudio(data);
+  //   }
+  // }, [data, sendStreamedAudio]);
 
-  const {
-    startRecording,
-    stopRecording,
-    isRecording,
-    togglePauseResume,
-    isPaused,
-  } = useAudioRecorder({
-    dataCb: (data: Int16Array) => {
-      setData(data);
-    },
-  });
+  // const {
+  //   startRecording,
+  //   stopRecording,
+  //   isRecording,
+  //   togglePauseResume,
+  //   isPaused,
+  // } = useAudioRecorder({
+  //   dataCb: (data: Int16Array) => {
+  //     setData(data);
+  //   },
+  // });
 
-  const onStartRecordingPress = async () => {
-    try {
-      const sampleRate = await startRecording();
-      initializeStream(sampleRate);
-      handleStartTranscription();
-      setIsTranscribing(true);
-    } catch (error) {
-      console.log("Recording failed");
-    }
-  };
+  // const onStartRecordingPress = async () => {
+  //   try {
+  //     const sampleRate = await startRecording();
+  //     initializeStream(sampleRate);
+  //     handleStartTranscription();
+  //     setIsTranscribing(true);
+  //   } catch (error) {
+  //     console.log("Recording failed");
+  //   }
+  // };
 
-  const onStopRecordingPress = () => {
-    stopRecording();
-    setTimeout(() => {
-      setIsTranscribing(false);
-    }, 3000);
-  };
+  // const onStopRecordingPress = () => {
+  //   stopRecording();
+  //   setTimeout(() => {
+  //     setIsTranscribing(false);
+  //   }, 3000);
+  // };
 
-  const handleCopyClick = () => {
-    navigator.clipboard.writeText(transcription);
-  };
+  // const handleCopyClick = () => {
+  //   navigator.clipboard.writeText(transcription);
+  // };
 
-  const handleClearText = () => {
-    setData(null);
-  };
+  // const handleClearText = () => {
+  //   setData(null);
+  // };
 
   return (
     <BrowserRouter>

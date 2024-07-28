@@ -76,17 +76,17 @@
 // };
 
 import React, { useState } from "react";
-import { useSpeech } from "@/hooks/useSpeech"; 
+import { useSpeech } from "@/hooks/useSpeech";
 import { SpeechEnginePlayState } from "@/types/speech";
 
 const SpeechComponent: React.FC = () => {
   const [text, setText] = useState("");
   const {
-    currentSentenceIdx,
+    // currentSentenceIdx,
     currentWordRange,
     playState,
-    currentSentence,
-    currentWord,
+    // currentSentence,
+    // currentWord,
     play,
     pause,
     resume,

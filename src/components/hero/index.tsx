@@ -16,7 +16,7 @@ import useAudioRecorder from "@/hooks/useAudioRecorder";
 import { Textarea } from "../ui/textarea";
 import { useSpeech } from "@/hooks/useSpeech";
 import { SpeechEnginePlayState } from "@/types/speech";
-import { Pause, Play } from "lucide-react";
+import { Play } from "lucide-react";
 
 const Hero: React.FunctionComponent = () => {
   const [data, setData] = useState<Int16Array | null>(null);
@@ -48,14 +48,14 @@ const Hero: React.FunctionComponent = () => {
   const [playStates, setPlayStates] = useState<SpeechEnginePlayState[]>(
     Array(cardsData.length).fill(SpeechEnginePlayState.STOPPED)
   );
-  const [currentSentenceIdxs, setCurrentSentenceIdxs] = useState<number[]>(
-    Array(cardsData.length).fill(0)
-  );
-  const [currentWordRanges, setCurrentWordRanges] = useState<
+  // const [currentSentenceIdxs, setCurrentSentenceIdxs] = useState<number[]>(
+  //   Array(cardsData.length).fill(0)
+  // );
+  const [currentWordRanges, _setCurrentWordRanges] = useState<
     [number, number][]
   >(Array(cardsData.length).fill([0, 0]));
 
-  const speechHooks = cardsData.map((card, index) => useSpeech(card.text));
+  const speechHooks = cardsData.map((card, _index) => useSpeech(card.text));
 
   const {
     socket,
