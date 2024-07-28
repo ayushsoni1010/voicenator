@@ -1,4 +1,5 @@
-import { useState, useCallback } from "react";
+// useSocket.tsx
+import { useState, useCallback, useEffect } from "react";
 import io, { Socket } from "socket.io-client";
 
 const serverURL = "http://localhost:8080";
@@ -8,12 +9,14 @@ const subscriptions = [
   "partial",
   "transcriber-ready",
   "error",
+  "transcript", // Add the 'transcript' event
 ] as const;
 
 type SubscriptionType = (typeof subscriptions)[number];
 
 const useSocket = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [transcription, setTranscription] = useState<string>("");
 
   const initialize = useCallback(() => {
     const _socket = io(serverURL);
@@ -71,8 +74,14 @@ const useSocket = () => {
   const handleStartTranscription = useCallback(() => {
     if (socket) {
       subscriptions.forEach((subscription: SubscriptionType) => {
-        socket.on(subscription, (data: string) => {
+        socket.on(subscription, (data: any) => {
           console.log(`Received: ${subscription} ---> ${data}`);
+          if (subscription === "transcript") {
+            console.log(data, "received");
+            setTranscription(
+              (prev) => prev + data.channel.alternatives[0].transcript
+            );
+          }
         });
       });
     } else {
@@ -82,6 +91,7 @@ const useSocket = () => {
 
   return {
     socket,
+    transcription,
     initialize,
     disconnect,
     onError,
