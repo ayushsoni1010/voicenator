@@ -1,118 +1,154 @@
-console.log("first");
+import "dotenv/config";
+import express from "express";
 import http from "http";
-import { Socket, Server as SocketIOServer } from "socket.io";
-import app from "./app";
-import logger from "./utils/logger";
-import { DEEPGRAM_API_KEY, PORT } from "./constants";
-import {
-  createClient,
-  ListenLiveClient,
-  LiveClient,
-  LiveTranscriptionEvents,
-} from "@deepgram/sdk";
+import path from "path";
+import { Server, Socket } from "socket.io";
+import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
+import cors from "cors";
+import Transcriber from "./services/transcriber.service";
+import { DEEPGRAM_API_KEY } from "./constants";
 
+const app = express();
 const server = http.createServer(app);
-
-const io = new SocketIOServer(server, {
+const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
   },
 });
 
-// Handle socket connections
+// const deepgramClient = createClient(process.env.DEEPGRAM_API_KEY || "");
+// let keepAlive: NodeJS.Timeout;
+
+// const setupDeepgram = (socket: any) => {
+//   const deepgram = deepgramClient.listen.live({
+//     model: "nova-2",
+//     punctuate: true,
+//     language: "en",
+//     smart_format: true,
+//     interim_results: true,
+//     diarize: false,
+//     endpointing: 0,
+//     encoding: "linear16",
+//     sample_rate: 48000,
+//   });
+
+//   if (keepAlive) clearInterval(keepAlive);
+//   keepAlive = setInterval(() => {
+//     console.log("deepgram: keepalive");
+//     deepgram.send("ping");
+//   }, 10 * 1000);
+
+//   deepgram.addListener(LiveTranscriptionEvents.Open, async () => {
+//     console.log("deepgram: connected");
+
+//     deepgram.addListener(LiveTranscriptionEvents.Transcript, (data: any) => {
+//       console.log("first message", data?.channel?.alternatives);
+//       console.log("deepgram: transcript received");
+//       console.log("socket.io: transcript sent to client");
+//       socket.emit("transcript", data);
+//     });
+
+//     deepgram.addListener(LiveTranscriptionEvents.Close, async () => {
+//       console.log("deepgram: disconnected");
+//       clearInterval(keepAlive);
+//       deepgram.finish();
+//     });
+
+//     deepgram.addListener(LiveTranscriptionEvents.Error, async (error: any) => {
+//       console.log("deepgram: error received");
+//       console.error(error);
+//     });
+
+//     deepgram.addListener(LiveTranscriptionEvents.Metadata, (data: any) => {
+//       console.log("deepgram: metadata received");
+//       console.log("socket.io: metadata sent to client");
+//       socket.emit("metadata", { metadata: data });
+//     });
+//   });
+
+//   return deepgram;
+// };
+
 // io.on("connection", (socket) => {
-//   logger.info(`New client connected: ${socket.id}`);
-//   //   socketHandlers(socket);
+//   console.log("socket.io: client connected");
+//   let deepgram = setupDeepgram(socket);
+
+//   socket.on("configure-stream", (data) => {
+//     console.log(`configure-stream: ${JSON.stringify(data, null, 2)}`);
+//     deepgram.send(JSON.stringify({ config: { sample_rate: data.sampleRate } }));
+//   });
+
+//   socket.on("incoming-audio", (audioData) => {
+//     console.log("socket.io: client data received");
+
+//     if (deepgram.getReadyState() === 1 /* OPEN */) {
+//       console.log("socket.io: data sent to deepgram");
+//       deepgram.send(audioData);
+//     } else if (deepgram.getReadyState() >= 2 /* 2 = CLOSING, 3 = CLOSED */) {
+//       console.log("socket.io: data couldn't be sent to deepgram");
+//       console.log("socket.io: retrying connection to deepgram");
+//       /* Attempt to reopen the Deepgram connection */
+//       deepgram.finish();
+//       deepgram.removeAllListeners();
+//       deepgram = setupDeepgram(socket);
+//     } else {
+//       console.log("socket.io: data couldn't be sent to deepgram");
+//     }
+//   });
+
+//   socket.on("stop-stream", async () => {
+//     console.log("socket.io: client stopped the stream");
+//     await deepgram.finish();
+//   });
 
 //   socket.on("disconnect", () => {
-//     logger.info(`Client disconnected: ${socket.id}`);
+//     console.log("socket.io: client disconnected");
+//     deepgram.finish();
+//     deepgram.removeAllListeners();
 //   });
 // });
 
-const deepgramClient = createClient(DEEPGRAM_API_KEY);
-let keepAlive: any;
+io.on("connection", (socket: Socket) => {
+  console.log("A user connected");
 
-const setupDeepgram = (socket: Socket) => {
-  const deepgram: any = deepgramClient.listen.live({
-    language: "en",
-    punctuate: true,
-    smart_format: true,
-    model: "nova",
+  const transcriber = new Transcriber(DEEPGRAM_API_KEY!, socket);
+
+  socket.on("configure-stream", (sampleRate: number) => {
+    console.log(`configure-stream: ${sampleRate}`);
+    transcriber.configureStream(sampleRate);
   });
 
-  if (keepAlive) clearInterval(keepAlive);
-  keepAlive = setInterval(() => {
-    console.log("deepgram: keepalive");
-    deepgram.keepAlive();
-  }, 10 * 1000);
-
-  deepgram.addListener(LiveTranscriptionEvents.Open, async () => {
-    console.log("deepgram: connected");
-
-    deepgram.addListener(LiveTranscriptionEvents.Transcript, (data: any) => {
-      console.log("deepgram: packet received");
-      console.log("deepgram: transcript received");
-      console.log("socket: transcript sent to client");
-      console.log(data, 101010);
-      socket.send(JSON.stringify(data));
-    });
-
-    deepgram.addListener(LiveTranscriptionEvents.Close, async () => {
-      console.log("deepgram: disconnected");
-      clearInterval(keepAlive);
-      deepgram.finish();
-    });
-
-    deepgram.addListener(LiveTranscriptionEvents.Error, async (error: any) => {
-      console.log("deepgram: error received");
-      console.error(error);
-    });
-
-    deepgram.addListener(LiveTranscriptionEvents.Metadata, (data: any) => {
-      console.log("deepgram: packet received");
-      console.log("deepgram: metadata received");
-      console.log("ws: metadata sent to client");
-      socket.send(JSON.stringify({ metadata: data }));
-    });
+  socket.on("incoming-audio", (audioData: Buffer) => {
+    console.log("socket.io: client data received");
+    transcriber.sendAudio(audioData);
   });
 
-  return deepgram;
-};
-
-io.on("connection", (socket) => {
-  logger.info(`New client connected: ${socket.id}`);
-
-  let deepgram = setupDeepgram(socket);
-
-  socket.on("message", (message) => {
-    console.log("socket: client data received");
-
-    if (deepgram.getReadyState() === 1 /* OPEN */) {
-      console.log("socket: data sent to deepgram");
-      deepgram.send(message);
-    } else if (deepgram.getReadyState() >= 2 /* 2 = CLOSING, 3 = CLOSED */) {
-      console.log("socket: data couldn't be sent to deepgram");
-      console.log("socket: retrying connection to deepgram");
-      /* Attempt to reopen the Deepgram connection */
-      deepgram.finish();
-      deepgram.removeAllListeners();
-      deepgram = setupDeepgram(socket);
-    } else {
-      console.log("socket: data couldn't be sent to deepgram");
-    }
+  socket.on("stop-stream", () => {
+    console.log("socket.io: client stopped the stream");
+    transcriber.stopStream();
   });
 
   socket.on("disconnect", () => {
-    logger.info(`Client disconnected: ${socket.id}`);
-    console.log("socket: client disconnected");
-    deepgram.finish();
-    deepgram.removeAllListeners();
-    deepgram = null;
+    console.log("socket.io: client disconnected");
+    transcriber.cleanup();
   });
 });
 
-// Start server
+app.use(cors({ credentials: false, origin: "*" }));
+app.use(express.json());
+
+const staticPath = path.resolve("public/");
+app.use(express.static(staticPath));
+
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api/")) {
+    return next();
+  }
+  res.sendFile(path.join(staticPath, "index.html"));
+});
+
+const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
+  console.log(`Server listening at http://localhost:${PORT}`);
 });
