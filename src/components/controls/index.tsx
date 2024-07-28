@@ -5,11 +5,11 @@ import { SpeechEnginePlayState } from "@/types/speech";
 const SpeechComponent: React.FC = () => {
   const [text, setText] = useState("");
   const {
-    currentSentenceIdx,
+    // currentSentenceIdx,
     currentWordRange,
     playState,
-    currentSentence,
-    currentWord,
+    // currentSentence,
+    // currentWord,
     play,
     pause,
     resume,
