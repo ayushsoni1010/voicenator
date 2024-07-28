@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import useAudioRecorder from "./hooks/useAudioRecorder";
 import useSocket from "./hooks/useSocket";
+import Header from "./components/header";
+import { BrowserRouter } from "react-router-dom";
+import Hero from "./components/hero";
 
 function App() {
   const {
@@ -71,8 +74,9 @@ function App() {
   };
 
   return (
-    <div>
-      <h1>Speechify Voice Notes</h1>
+    <BrowserRouter>
+      <Hero />
+      {/* <h1>Speechify Voice Notes</h1>
       <p>Record or type something in the textbox.</p>
       <textarea
         id="transcription-display"
@@ -98,8 +102,8 @@ function App() {
       </button>
       <button id="reset-button" onClick={handleClearText}>
         Clear
-      </button>
-    </div>
+      </button> */}
+    </BrowserRouter>
   );
 }
 
