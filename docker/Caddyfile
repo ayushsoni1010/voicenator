@@ -1,0 +1,13 @@
+backend.ayushsoni1010.com {
+
+    # Reverse proxy for main traffic
+    reverse_proxy backend:4000
+
+    # Websocket handling
+    @websockets {
+        path /socket.io
+        header Connection *Upgrade*
+        header Upgrade websocket
+    }
+    reverse_proxy @websockets backend:4000
+}

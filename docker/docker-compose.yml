@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  backend:
+    build: ../server
+    restart: always
+    env_file:
+      - ../server/.env
+    environment:
+      - "NODE_ENV=production"
+    networks:
+      - voicenator
+
+  caddy:
+    image: caddy:2.8.4
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - "backend"
+    networks:
+      - voicenator
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  voicenator:
