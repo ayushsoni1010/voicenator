@@ -1,7 +1,7 @@
 backend.ayushsoni1010.com {
 
     # Reverse proxy for main traffic
-    reverse_proxy backend:4000
+    reverse_proxy backend:8080
 
     # Websocket handling
     @websockets {
@@ -9,5 +9,5 @@ backend.ayushsoni1010.com {
         header Connection *Upgrade*
         header Upgrade websocket
     }
-    reverse_proxy @websockets backend:4000
+    reverse_proxy @websockets backend:8080
 }

@@ -1,15 +1,13 @@
-// useSocket.tsx
+import { SERVER_URL } from "@/constants";
 import { useState, useCallback } from "react";
 import io, { Socket } from "socket.io-client";
-
-const serverURL = "http://localhost:8080";
 
 const subscriptions = [
   "final",
   "partial",
   "transcriber-ready",
   "error",
-  "transcript", // Add the 'transcript' event
+  "transcript",
 ] as const;
 
 type SubscriptionType = (typeof subscriptions)[number];
@@ -19,7 +17,7 @@ const useSocket = () => {
   const [transcription, setTranscription] = useState<string>("");
 
   const initialize = useCallback(() => {
-    const _socket = io(serverURL);
+    const _socket = io(SERVER_URL);
     setSocket(_socket);
 
     _socket.on("connect", () => {
